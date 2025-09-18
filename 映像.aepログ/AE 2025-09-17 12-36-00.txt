@@ -1,0 +1,17 @@
+プロジェクトﾞ映像.aepﾞのAdobe After Effects v25.1 Windows 64レンダリングログ
+
+レンダリングは2025/09/17、 12:36:00に開始しました。
+
+  2025/09/17 12:36:00 : コンポジションﾞANSWERINGテンプレートﾞの開始
+
+  出力先 : D:\Documents\iglobe\project\app\static\image\ANSWERING.jpg  After Effects エラー: モーダルダイアログが応答を待機中は、スクリプトを実行できません。  2025/09/17 12:36:00 : コンポジションﾞANSWERINGテンプレートﾞの終了
+
+
+  2025/09/17 12:36:00 : コンポジションﾞWAITINGﾞの開始
+
+  出力先 : D:\Documents\iglobe\project\app\static\image\WAITING.jpg    2025/09/17 12:36:00 : コンポジションﾞWAITINGﾞの終了
+
+
+  合計経過時間 : 0 秒
+ログは2025/09/17、12:36:00に閉じられました。
+

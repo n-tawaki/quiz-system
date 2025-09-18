@@ -1,0 +1,17 @@
+# 環境変数ファイルは公開しない
+.env
+
+# Python のキャッシュファイルを除外
+__pycache__/
+*.pyc
+
+# Docker 関連で不要なもの
+*.log
+
+# VSCode の設定を除外（人によっては残す場合もある）
+.vscode/
+
+# ae関連フォルダを除外
+映像_AME/
+映像.apeログ/
+Adobe After Effects 自動保存/

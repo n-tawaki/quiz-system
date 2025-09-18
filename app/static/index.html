@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>参加者画面</title>
+</head>
+
+<body>
+    <h1>参加者画面</h1>
+
+    <div id="login">
+        <h2>ユーザ名を入力してください</h2>
+        <div>設定した名前は結果画面で表示されます</div>
+        <input type="text" id="usernameInput">
+        <button onclick="login()">参加</button>
+    </div>
+
+    <div id="main" style="display:none;">
+        <div id="status"></div>
+        <div id="count">1問目</div>
+        <div id="score">スコア：0</div>
+        <div id="question"></div>
+        <div id="answer-area">
+            <label><input type="radio" name="choice" value="1" onclick="setDisabled(false)" disabled> 1</label><br>
+            <label><input type="radio" name="choice" value="2" onclick="setDisabled(false)" disabled> 2</label><br>
+            <label><input type="radio" name="choice" value="3" onclick="setDisabled(false)" disabled> 3</label><br>
+            <label><input type="radio" name="choice" value="4" onclick="setDisabled(false)" disabled> 4</label><br>
+        </div>
+        <button id="submit" disabled="true">回答送信</button>
+        <button id="reset" onclick="reset()">ユーザ名リセット(動確用)</button>
+    </div>
+
+    <script>
+        //ユーザ名リセット関数(動確用)
+        function reset(){
+            localStorage.removeItem("userName");
+        }
+
+        let userName = localStorage.getItem("userName");
+
+        function login() {
+            const input = document.getElementById("usernameInput").value.trim();
+            if (!input) {
+                alert("ユーザ名を入力してください");
+                return;
+            }
+            userName = input;
+            localStorage.setItem("userName", userName);
+
+            document.getElementById("login").style.display = "none";
+            document.getElementById("main").style.display = "block";
+            init();
+        }
+
+        window.onload = () => {
+            if (userName) {
+                // すでに名前が保存されている場合はログイン済み状態で開始
+                document.getElementById("login").style.display = "none";
+                document.getElementById("main").style.display = "block";
+                init();
+            }
+        };
+
+        let currentQuestionId;
+        let answered = false;
+        let currentState;
+
+        // 初期化処理
+        async function init() {
+            try {
+                // サーバの現在の状態を取得
+                const res = await fetch("http://localhost:8000/state");
+                const stateInfo = await res.json();
+                currentState = stateInfo.state;
+                currentQuestionId = stateInfo.question_id;
+                if (currentQuestionId === 0) {
+                    document.getElementById("count").textContent = "問題開始前";
+                } else {
+                    document.getElementById("count").textContent = currentQuestionId + "問目";
+                }
+                if (currentState === "ANSWERING" && currentQuestionId > 0) {
+                    // すでに回答済みか確認
+                    const res2 = await fetch(`http://localhost:8000/answers/${userName}/${currentQuestionId}`);
+                    const ans = await res2.json();
+                    if (ans.answered) {
+                        setDisabled(true);
+                        document.getElementById("submit").textContent = "回答済み";
+                    } else {
+                        setDisabled(false);
+                        resetChoices();
+                    }
+                    document.body.style.backgroundColor = "lightgreen";
+                } else {
+                    setDisabled(true);
+                    document.body.style.backgroundColor = "lightgray";
+                }
+                score();
+
+            } catch (err) {
+                console.error("初期化失敗:", err);
+            }
+        }
+
+        //　1. スコアを表示
+        async function score(){
+            fetch(`http://localhost:8000/scores/${userName}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("score").textContent = "スコア：" + data.score;
+            })
+        }
+
+        const statusDiv = document.getElementById("status");
+
+        // 2. 回答送信
+        document.getElementById("submit").onclick = () => {
+            const selected = document.querySelector('input[name="choice"]:checked');
+            setDisabled(true);
+            fetch("http://localhost:8000/answers", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user_name: userName,       // 固定値
+                    question_id: currentQuestionId,
+                    selected_choice: selected.value
+                })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    //alert(data.is_correct ? "正解！" : "不正解！");
+                    //document.getElementById("status").textContent = "状態: 回答済み";
+                    document.getElementById("submit").textContent = "回答済み";
+                });
+        };
+
+        // WebSocket接続開始
+        const ws = new WebSocket("ws://localhost:8000/ws");
+
+        ws.onopen = () => {
+            //statusDiv.textContent = "状態: 接続中";
+        };
+
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            if (data.state) {
+                currentState = data.state;
+                if (data.state === "ANSWERING" && data.question_id) {
+                    currentQuestionId = data.question_id;
+                    document.getElementById("count").textContent = currentQuestionId + "問目";
+                    console.log("WSから受け取ったquestion_id:", data.question_id);
+                    console.log("fetch URL:", `http://localhost:8000/answers/${userName}/${currentQuestionId}`);
+
+                    // 回答状態をサーバに問い合わせる（state が ANSWERING になった時だけ）
+                    const res = await fetch(`http://localhost:8000/answers/${userName}/${currentQuestionId}`);
+                    const ans = await res.json();
+
+                    if (ans.answered) {
+                        setDisabled(true);
+                        document.getElementById("submit").textContent = "回答済み";
+                    } else {
+                        setDisabled(false);
+                        resetChoices();
+                        document.getElementById("submit").textContent = "回答送信";
+                    }
+
+                    document.body.style.backgroundColor = "lightgreen";
+                } else if(data.state === "FINISHED"){
+                    document.body.style.backgroundColor = "lightgray";
+                    setDisabled(true);
+                } else if(data.state === "CORRECT"){
+                    score();
+                }
+            }
+        };
+
+        ws.onclose = () => {
+        };
+
+        function setDisabled(boolean) {
+            for (let i = 0; i < 4; i++) {
+                document.getElementsByName("choice")[i].disabled = boolean;
+            }
+            document.getElementById("submit").disabled = boolean;
+        }
+
+        function resetChoices() {
+            for (let i = 0; i < 4; i++) {
+                document.getElementsByName("choice")[i].checked = false;
+            }
+            document.getElementById("submit").disabled = true;
+        }
+
+    </script>
+</body>
+
+</html>

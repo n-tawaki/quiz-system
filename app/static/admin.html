@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>管理者画面</title>
+</head>
+
+<body>
+    <h1>管理者画面</h1>
+    <div id="count">1問目</div>
+    <div id="state">待機中</div>
+    <button class="stateBtn" id="WAITING" onclick="setState('WAITING')">待機中にする</button>
+    <button class="stateBtn" id="ANSWERING" onclick="setState('ANSWERING')">回答受付開始</button>
+    <button class="stateBtn" id="FINISHED" onclick="setState('FINISHED')">回答終了</button>
+    <button class="stateBtn" id="CHECK" onclick="setState('CHECK')">回答集計</button>
+    <button class="stateBtn" id="CORRECT" onclick="setState('CORRECT')">正解発表</button>
+    <button onclick="showRanking('admin')">ランキング表示(管理者画面)</button>
+    <button onclick="showRanking('monitor')">ランキング表示(モニター画面)</button>
+
+    <div id="1"></div>
+    <div id="2"></div>
+    <div id="3"></div>
+
+    <script>
+        let currentQuestionId = 0;
+        function setState(state) {
+            if(state === "ANSWERING"){
+                currentQuestionId++;
+            }
+            fetch("http://localhost:8000/state", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ state: state, question_id: currentQuestionId })
+            })
+                .then(res => res.json())
+                .catch(err => console.error(err));
+            document.getElementById("count").textContent = currentQuestionId + "問目";
+            document.getElementById("state").textContent = state;
+        }
+        function showRanking(monitor){
+            if(monitor === "monitor"){
+            setState('RESULT');
+            }
+            fetch("http://localhost:8000/ranking",{
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    for(i=0; i<3; i++){
+                        let rank = data[i].rank;
+                        let name = data[i].user_name;
+                        let point = data[i].point;
+                        let time = data[i].time;
+                        document.getElementById(i+1).textContent = rank + "位：" + name + "さん　" + point + "点　" + time + "秒";
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+    </script>
+</body>
+
+</html>

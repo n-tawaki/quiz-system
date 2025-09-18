@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>モニター画面</title>
+    <style>
+        body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        }
+        /* 背景画像を全画面にフィット */
+        .background {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 画像を切り抜いて全画面表示 */
+        z-index: -1;       /* 背景にする */
+        }
+        /* 背景画像を全画面にフィット */
+        .background2 {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 画像を切り抜いて全画面表示 */
+        z-index: -2;       /* 背景にする */
+        }
+        /* 上に表示する文字 */
+        .overlay-text {
+        position: absolute;
+        top: 50%; left: 50%;
+        color: white;
+        font-size: 4vw;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px black;
+        }
+        .overlay-text-check {
+        position: absolute;
+        color: white;
+        font-size: 5vw;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px black;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 背景画像 -->
+    <video id="video_bg" src="./video/WAITING.mp4" alt="背景" class="background2" autoplay muted></video>
+    <video id="video" src="" poster="" alt="背景" class="background" autoplay muted></video>
+    <!-- 可変文字 -->
+    <h2 id="rank_name_1" class="overlay-text" style="top:10%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_2" class="overlay-text" style="top:18.5%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_3" class="overlay-text" style="top:27%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_4" class="overlay-text" style="top:34.5%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_5" class="overlay-text" style="top:42.5%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_6" class="overlay-text" style="top:50%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_7" class="overlay-text" style="top:58%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_8" class="overlay-text" style="top:66%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_9" class="overlay-text" style="top:74%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_name_10" class="overlay-text" style="top:81.5%; left:25.5%;">&nbsp;</h2>
+    <h2 id="rank_point_1" class="overlay-text" style="top:10%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_2" class="overlay-text" style="top:18.5%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_3" class="overlay-text" style="top:27%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_4" class="overlay-text" style="top:34.5%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_5" class="overlay-text" style="top:42.5%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_6" class="overlay-text" style="top:50%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_7" class="overlay-text" style="top:58%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_8" class="overlay-text" style="top:66%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_9" class="overlay-text" style="top:74%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_point_10" class="overlay-text" style="top:81.5%; left:60%;">&nbsp;</h2>
+    <h2 id="rank_time_1" class="overlay-text" style="top:10%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_2" class="overlay-text" style="top:18.5%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_3" class="overlay-text" style="top:27%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_4" class="overlay-text" style="top:34.5%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_5" class="overlay-text" style="top:42.5%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_6" class="overlay-text" style="top:50%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_7" class="overlay-text" style="top:58%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_8" class="overlay-text" style="top:66%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_9" class="overlay-text" style="top:74%; left:69%;">&nbsp;</h2>
+    <h2 id="rank_time_10" class="overlay-text" style="top:81.5%; left:69%;">&nbsp;</h2>
+    <h2 id="check_1" class="overlay-text-check" style="top:29.5%; left:41%;">&nbsp;</h2>
+    <h2 id="check_2" class="overlay-text-check" style="top:29.5%; left:73%;">&nbsp;</h2>
+    <h2 id="check_3" class="overlay-text-check" style="top:71%; left:41%;">&nbsp;</h2>
+    <h2 id="check_4" class="overlay-text-check" style="top:71%; left:73%;">&nbsp;</h2>
+
+    <script>
+        // 初期化処理
+        async function init() {
+            try {
+                // サーバの現在の状態を取得
+                const res = await fetch("http://localhost:8000/state");
+                const stateInfo = await res.json();
+                currentState = stateInfo.state;
+                currentQuestionId = stateInfo.question_id;
+            } catch (err) {
+                console.error("初期化失敗:", err);
+            }
+        }
+
+        const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+        async function showRanking() {
+            try {
+                const res = await fetch("http://localhost:8000/ranking", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                for (i = 9; i >= 0; i--) {
+                    let name = data[i].user_name;
+                    let point = data[i].point;
+                    let time = data[i].time;
+                    document.getElementById(`rank_name_${i+1}`).textContent = name;
+                    document.getElementById(`rank_point_${i+1}`).textContent = point;
+                    document.getElementById(`rank_time_${i+1}`).textContent = time;
+                    await sleep(1000);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function answerCheck(){
+            fetch(`http://localhost:8000/answer_check/${currentQuestionId}`,{
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    for(i=0; i<4; i++){
+                        let count = data[i].count;
+                        document.getElementById(`check_${i+1}`).textContent = count;
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        async function correctAnswer(){
+            fetch(`http://localhost:8000/correct_answer/${currentQuestionId}`,{
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    let correct = data;
+                    for(i=0; i<4; i++){
+                        if(i+1 != correct){
+                           document.getElementById(`check_${i+1}`).style.color = "hsl(0,0%,50%)";
+                        }
+                    }
+                })
+                .catch(err => console.error(err));
+        }
+
+        function switchImage(data){
+            if(data.state === "FINISHED"){
+            }else{
+                document.getElementById("video").src="./video/"+data.state+".mp4"
+            }
+        }
+
+        // WebSocket接続開始
+        const ws = new WebSocket("ws://localhost:8000/ws");
+
+        ws.onopen = () => {
+            //statusDiv.textContent = "状態: 接続中";
+        };
+
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            if (data.state) {
+                if(data.state != "CHECK" && data.state != "CORRECT"){
+                    for(i=0; i<4; i++){
+                        document.getElementById(`check_${i+1}`).style.color = "hsl(0,0%,100%)";
+                        document.getElementById(`check_${i+1}`).textContent = "";
+                    }
+                }
+                if(data.state != "RESULT"){
+                    for (i = 9; i >= 0; i--) {
+                        document.getElementById(`rank_name_${i+1}`).textContent = "";
+                        document.getElementById(`rank_point_${i+1}`).textContent = "";
+                        document.getElementById(`rank_time_${i+1}`).textContent = "";
+                    }
+                }
+                if (data.state === "ANSWERING" && data.question_id) {
+                    switchImage(data);
+                    currentQuestionId = data.question_id;
+                } else if (data.state === "RESULT") {
+                    switchImage(data);
+                    // 最終結果表示
+                    showRanking();
+                } else if (data.state === "CHECK"){
+                    switchImage(data);
+                    // 回答集計結果表示
+                    answerCheck();
+                } else if (data.state === "CORRECT"){
+                    switchImage(data);
+                    // 正解表示
+                    correctAnswer();
+                }
+            }
+        };
+
+        ws.onclose = () => {
+        };
+
+    </script>
+</body>
+
+</html>
