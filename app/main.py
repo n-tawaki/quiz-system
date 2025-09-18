@@ -28,10 +28,10 @@ question_start_time = None
 # -------------------------------
 def get_db_connection():
     conn = psycopg2.connect(
-        dbname=os.getenv("POSTGRES_DB", "quiz_postgres"),
-        user=os.getenv("POSTGRES_USER", "quiz_user"),
-        password=os.getenv("POSTGRES_PASSWORD", "hogehoge"),
-        host=os.getenv("POSTGRES_HOST", "localhost"),
+        dbname=os.getenv("POSTGRES_DB", "yourdb"),
+        user=os.getenv("POSTGRES_USER", "youruser"),
+        password=os.getenv("POSTGRES_PASSWORD", "yourpass"),
+        host=os.getenv("POSTGRES_HOST", "postgres"),
         port=os.getenv("POSTGRES_PORT", "5432"),
     )
     return conn
