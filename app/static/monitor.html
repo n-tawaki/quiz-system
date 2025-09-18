@@ -229,7 +229,30 @@
         const ws = new WebSocket(`${API_BASE.replace(/^http/, 'ws')}/ws`);
 
         ws.onopen = () => {
-            //statusDiv.textContent = "状態: 接続中";
+            const videoList = [
+                "./video/WAITING.mp4",
+                "./video/RESULT.mp4",
+                "./video/ANSWERING_1.mp4",
+                "./video/ANSWERING_2.mp4",
+                "./video/ANSWERING_3.mp4",
+                "./video/ANSWERING_4.mp4",
+                "./video/ANSWERING_5.mp4",
+                "./video/CHECK_1.mp4",
+                "./video/CHECK_2.mp4",
+                "./video/CHECK_3.mp4",
+                "./video/CHECK_4.mp4",
+                "./video/CHECK_5.mp4",
+                "./video/CORRECT_1.mp4",
+                "./video/CORRECT_2.mp4",
+                "./video/CORRECT_3.mp4",
+                "./video/CORRECT_4.mp4",
+                "./video/CORRECT_5.mp4",
+            ];
+
+            videoList.forEach(src => {
+                preloadVideo(src);
+            });
+            alert("プリロード完了");
         };
 
         ws.onmessage = async (event) => {
@@ -269,6 +292,13 @@
 
         ws.onclose = () => {
         };
+
+        function preloadVideo(src) {
+            const video = document.createElement("video");
+            video.src = src;
+            video.preload = "auto";
+            video.load();
+        }
 
     </script>
 </body>
