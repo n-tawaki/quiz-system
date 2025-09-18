@@ -23,12 +23,16 @@
     <div id="3"></div>
 
     <script>
+        const API_BASE = window.location.hostname === "localhost"
+        ? "http://localhost:8000"
+        : "https://quiz-system-3ajb.onrender.com";
+
         let currentQuestionId = 0;
         function setState(state) {
             if(state === "ANSWERING"){
                 currentQuestionId++;
             }
-            fetch("http://localhost:8000/state", {
+            fetch(`${API_BASE}/state`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ state: state, question_id: currentQuestionId })
@@ -42,7 +46,7 @@
             if(monitor === "monitor"){
             setState('RESULT');
             }
-            fetch("http://localhost:8000/ranking",{
+            fetch(`${API_BASE}/ranking`,{
                 method: "GET",
                 headers: { "Content-Type": "application/json" }
             })

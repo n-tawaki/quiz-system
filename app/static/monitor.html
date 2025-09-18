@@ -89,11 +89,15 @@
     <h2 id="check_4" class="overlay-text-check" style="top:71%; left:73%;">&nbsp;</h2>
 
     <script>
+        const API_BASE = window.location.hostname === "localhost"
+        ? "http://localhost:8000"
+        : "https://quiz-system-3ajb.onrender.com";
+
         // 初期化処理
         async function init() {
             try {
                 // サーバの現在の状態を取得
-                const res = await fetch("http://localhost:8000/state");
+                const res = await fetch(`${API_BASE}/state`);
                 const stateInfo = await res.json();
                 currentState = stateInfo.state;
                 currentQuestionId = stateInfo.question_id;
@@ -106,7 +110,7 @@
 
         async function showRanking() {
             try {
-                const res = await fetch("http://localhost:8000/ranking", {
+                const res = await fetch(`${API_BASE}/ranking`, {
                     method: "GET",
                     headers: { "Content-Type": "application/json" }
                 });
@@ -126,7 +130,7 @@
         }
 
         async function answerCheck(){
-            fetch(`http://localhost:8000/answer_check/${currentQuestionId}`,{
+            fetch(`${API_BASE}/answer_check/${currentQuestionId}`,{
                 method: "GET",
                 headers: { "Content-Type": "application/json" }
             })
@@ -141,7 +145,7 @@
         }
 
         async function correctAnswer(){
-            fetch(`http://localhost:8000/correct_answer/${currentQuestionId}`,{
+            fetch(`${API_BASE}/correct_answer/${currentQuestionId}`,{
                 method: "GET",
                 headers: { "Content-Type": "application/json" }
             })
@@ -165,7 +169,7 @@
         }
 
         // WebSocket接続開始
-        const ws = new WebSocket("ws://localhost:8000/ws");
+        const ws = new WebSocket(`${API_BASE.replace(/^http/, 'ws')}/ws`);
 
         ws.onopen = () => {
             //statusDiv.textContent = "状態: 接続中";
