@@ -91,10 +91,16 @@
     <h2 id="rank_time_8" class="overlay-text" style="top:66%; left:69%;">&nbsp;</h2>
     <h2 id="rank_time_9" class="overlay-text" style="top:74%; left:69%;">&nbsp;</h2>
     <h2 id="rank_time_10" class="overlay-text" style="top:81.5%; left:69%;">&nbsp;</h2>
+    <!-- 選択肢欄が2*2で並ぶ場合
     <h2 id="check_1" class="overlay-text-check" style="top:29.5%; left:41%;">&nbsp;</h2>
     <h2 id="check_2" class="overlay-text-check" style="top:29.5%; left:73%;">&nbsp;</h2>
     <h2 id="check_3" class="overlay-text-check" style="top:71%; left:41%;">&nbsp;</h2>
     <h2 id="check_4" class="overlay-text-check" style="top:71%; left:73%;">&nbsp;</h2>
+    -->
+    <h2 id="check_1" class="overlay-text-check" style="top:6%; left:72.5%;">&nbsp;</h2>
+    <h2 id="check_2" class="overlay-text-check" style="top:28.5%; left:72.5%;">&nbsp;</h2>
+    <h2 id="check_3" class="overlay-text-check" style="top:50.5%; left:72.5%;">&nbsp;</h2>
+    <h2 id="check_4" class="overlay-text-check" style="top:72.5%; left:72.5%;">&nbsp;</h2>
 
     <script>
         const API_BASE = window.location.hostname === "localhost"
@@ -123,6 +129,7 @@
                     headers: { "Content-Type": "application/json" }
                 });
                 const data = await res.json();
+                await sleep(1000);
                 for (i = 9; i >= 0; i--) {
                     let name = data[i].user_name;
                     let point = data[i].point;
@@ -208,7 +215,13 @@
             if(data.state === "FINISHED"){
             }else{
                 //document.getElementById("video").src="./video/"+data.state+".mp4"
-                switchVideo(`./video/${data.state}.mp4`);
+                if(data.state === "WAITING" || data.state === "RESULT"){
+                    switchVideo(`./video/${data.state}.mp4`);
+                    
+                }else{
+                    switchVideo(`./video/${data.state}_${data.question_id}.mp4`);
+                }
+
             }
         }
 
