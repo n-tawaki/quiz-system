@@ -352,5 +352,8 @@ def get_correct_answer(question_id: int):
             conn.close()
     
 
-# 静的ファイルを / で配信
-app.mount("/", StaticFiles(directory="app/static", html=True), name="static")
+# 現在のファイル位置から static フォルダまでの絶対パス
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# static フォルダを / でアクセス可能にする
+app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "static"), html=True), name="static")
